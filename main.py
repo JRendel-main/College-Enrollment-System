@@ -6,12 +6,80 @@ import smtplib
 from tkinter import messagebox as mb
 import math
 
+
 def main():
-    #create window for view, insert, update, delete students database
-    toplevel = tk.Toplevel()
-    toplevel.title("Student Database")
-    toplevel.geometry("500x500")
-    toplevel.resizable(False, False)
+    def viewProfile():
+        # create view profile window
+        view_profile = tk.Toplevel(win)
+        view_profile.title("View Profile")
+        view_profile.geometry("1250x720")
+        view_profile.resizable(False, False)
+
+        # create view profile frame
+        view_profile_frame = tk.Frame(view_profile, bg="white")
+        view_profile_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        # get student details from database and display to treeview
+        conn = sl.connect('college.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM students WHERE student_id = ?", (entry_1.get(),))
+        student = c.fetchone()
+
+        # create treeview and add columns to it displaying student details
+        tree = ttk.Treeview(view_profile_frame, columns=("Student ID", "First Name", "Last Name", "Course", "Address", "Email", "Password"))
+        tree.heading("#0", text="Student ID")
+        tree.heading("#1", text="First Name")
+        tree.heading("#2", text="Last Name")
+        tree.heading("#3", text="Course")
+        tree.heading("#4", text="Address")
+        tree.heading("#5", text="Email")
+        tree.heading("#6", text="Password")
+        tree.insert("", "end", text=student[0], values=(student[1], student[2], student[3], student[4], student[5], student[6]))
+        tree.pack()
+
+        # create back button
+        back_button = tk.Button(view_profile_frame, text="Back", command=view_profile.destroy)
+        back_button.pack()
+
+
+
+
+
+    # create main window student portal
+    win = tk.Tk()
+    win.title("Student Portal")
+    win.geometry("500x500")
+    win.resizable(False, False)
+
+    # create menubar
+    menubar = tk.Menu(win)
+    win.config(menu=menubar)
+    # create student menu
+    student_menu = tk.Menu(menubar, tearoff=0)
+    student_menu.add_command(label="View Profile", command=viewProfile)
+    student_menu.add_command(label="Edit Profile")
+    student_menu.add_command(label="Change Password")
+    student_menu.add_command(label="Logout")
+    student_menu.add_command(label="Exit")
+    menubar.add_cascade(label="Student", menu=student_menu)
+
+    # create course menu
+    course_menu = tk.Menu(menubar, tearoff=0)
+    course_menu.add_command(label="View Courses")
+    course_menu.add_command(label="Register Courses")
+    course_menu.add_command(label="Drop Courses")
+    course_menu.add_command(label="View Grades")
+    menubar.add_cascade(label="Course", menu=course_menu)
+
+    # create label welcome message and display student name
+    conn = sl.connect('college.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM students WHERE student_id = ?", (entry_1.get(),))
+    student = c.fetchone()
+    welcome_label = tk.Label(win, text="Welcome " + student[1] + " " + student[2])
+    welcome_label.pack()
+
+    win.mainloop()
 
 
 def enrollmentform():
@@ -29,19 +97,22 @@ def enrollmentform():
         s.sendmail("hirotoshitest@gmail.com", entry_6.get(), message)
         s.quit()
         mb.showinfo("OTP Verification", "OTP has been sent to your registered email address.")
-        #create table students and insert into database
+        # create table students and insert into database
         conn = sl.connect('college.db')
         c = conn.cursor()
-        c.execute("CREATE TABLE IF NOT EXISTS students (student_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, course TEXT, address TEXT, email TEXT, password TEXT)")
-        c.execute("INSERT INTO students VALUES (:student_id, :first_name, :last_name, :course, :address, :email, :password)", {
-            'student_id': int(OTP),
-            'first_name': entry_3.get(),
-            'last_name': entry_4.get(),
-            'course': combobox_1.get(),
-            'address': entry_5.get(),
-            'email': entry_6.get(),
-            'password': 'pass'
-        })
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS students (student_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, course TEXT, address TEXT, email TEXT, password TEXT)")
+        c.execute(
+            "INSERT INTO students VALUES (:student_id, :first_name, :last_name, :course, :address, :email, :password)",
+            {
+                'student_id': int(OTP),
+                'first_name': entry_3.get(),
+                'last_name': entry_4.get(),
+                'course': combobox_1.get(),
+                'address': entry_5.get(),
+                'email': entry_6.get(),
+                'password': 'pass'
+            })
         conn.commit()
         conn.close()
         mb.showinfo("Success", "Student Added")
@@ -54,11 +125,11 @@ def enrollmentform():
     toplevel_2.geometry("640x480")
     frame_2 = ttk.Frame(toplevel_2)
     frame_2.configure(height=200, width=200)
-    label_3 = ttk.Label(frame_2)
-    label_3.configure(
+    lbl3 = ttk.Label(frame_2)
+    lbl3.configure(
         font="{Arial Rounded MT Bold} 20 {bold}",
         text='Enrollment Form')
-    label_3.place(anchor="center", relx=0.5, rely=0.5, x=0, y=0)
+    lbl3.place(anchor="center", relx=0.5, rely=0.5, x=0, y=0)
     frame_2.place(
         anchor="center",
         relheight=0.1,
@@ -79,7 +150,7 @@ def enrollmentform():
     label_5.place(anchor="n", relx=0.5, rely=0.21, x=0, y=0)
     entry_4 = ttk.Entry(frame_3)
     entry_4.place(anchor="n", relx=0.5, rely=0.28, x=0, y=0)
-    
+
     combobox_1 = ttk.Combobox(frame_3)
     combobox_1['values'] = ('BSIT', 'BSBA', 'BSMA', 'BIT')
     combobox_1.configure(state="normal")
@@ -113,6 +184,7 @@ def enrollmentform():
         y=0)
     toplevel_2.mainloop()
 
+
 def login():
     conn = sl.connect('college.db')
     c = conn.cursor()
@@ -120,11 +192,11 @@ def login():
     if c.fetchone() is not None:
         print("Login Successful")
         mb.showinfo("Login", "Login Successful")
-        toplevel.destroy()
         main()
     else:
         print("Login Failed")
         mb.showerror("Error", "Invalid Student ID or Password")
+
 
 root = tk.Tk()
 # hide root
