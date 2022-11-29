@@ -7,8 +7,11 @@ from tkinter import messagebox as mb
 import math
 
 def main():
-    print('main')
-    root.destroy()
+    #create window for view, insert, update, delete students database
+    toplevel = tk.Toplevel()
+    toplevel.title("Student Database")
+    toplevel.geometry("500x500")
+    toplevel.resizable(False, False)
 
 
 def enrollmentform():
@@ -43,7 +46,6 @@ def enrollmentform():
         conn.close()
         mb.showinfo("Success", "Student Added")
         toplevel, toplevel_2.destroy()
-        newStudent()
 
     def cancel():
         toplevel_2.withdraw()
@@ -117,61 +119,12 @@ def login():
     c.execute("SELECT * FROM students WHERE student_id = ? AND password = ?", (entry_1.get(), entry_2.get()))
     if c.fetchone() is not None:
         print("Login Successful")
+        mb.showinfo("Login", "Login Successful")
         toplevel.destroy()
         main()
     else:
         print("Login Failed")
-
-def newStudent():
-    root = tk.Tk()
-    # hide root
-    root.withdraw()
-    # remove root window
-    toplevel = tk.Toplevel(root)
-    toplevel.geometry("1024x576")
-    toplevel.configure(background='gray')
-    label_1 = ttk.Label(toplevel)
-    label_1.configure(
-        font="{Arial Rounded MT Bold} 24 {}",
-        relief="flat",
-        text='College Enrollment System\n')
-    label_1.place(
-        anchor="center",
-        bordermode="outside",
-        relheight=0.081,
-        relx=0.5,
-        rely=0.13,
-        x=0,
-        y=0)
-    frame_1 = ttk.Frame(toplevel)
-    frame_1.configure(height=200, width=200)
-    label_2 = ttk.Label(frame_1)
-    label_2.configure(
-        font="{Arial Rounded MT Bold} 24 {}",
-        relief="flat",
-        text='Verify')
-    label_2.place(anchor="center", relx=0.5, rely=0.14, x=0, y=0)
-    entry_1 = ttk.Entry(frame_1)
-    entry_1.place(anchor="center", relx=0.6, rely=0.42, x=0, y=0)
-    entry_2 = ttk.Entry(frame_1, show='*')
-    entry_2.place(anchor="center", relx=0.6, rely=0.64, x=0, y=0)
-    label_3 = ttk.Label(frame_1)
-    label_3.configure(font="{@Malgun Gothic} 16 {}", text='OTP/Student No: ')
-    label_3.place(anchor="nw", relx=0.1, rely=0.35, x=0, y=0)
-    label_4 = ttk.Label(frame_1)
-    label_4.configure(font="{@Malgun Gothic} 16 {}", text='Password: ')
-    label_4.place(anchor="nw", relx=0.1, rely=0.57, x=0, y=0)
-    button_1 = ttk.Button(frame_1)
-    button_1.configure(text='Verify', command=login)
-    button_1.place(anchor="center", relx=0.5, rely=0.79, x=0, y=0)
-    frame_1.place(
-        anchor="nw",
-        relheight=0.47,
-        relwidth=0.39,
-        relx=0.3,
-        rely=0.31,
-        x=0,
-        y=0)
+        mb.showerror("Error", "Invalid Student ID or Password")
 
 root = tk.Tk()
 # hide root
