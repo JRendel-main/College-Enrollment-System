@@ -6,8 +6,9 @@ import smtplib
 from tkinter import messagebox as mb
 import math
 
-
 def main():
+    # hide root window
+    root.withdraw()
     def viewProfile():
         # create view profile window
         view_profile = tk.Toplevel(win)
@@ -106,6 +107,170 @@ def main():
         save_button = tk.Button(edit_profile_frame, text="Save", command=save)
         save_button.pack()
 
+    def viewAllStudents():
+        # create view all students window
+        view_all_students = tk.Toplevel(win)
+        view_all_students.title("View All Students")
+        view_all_students.geometry("1250x720")
+        view_all_students.state("zoomed")
+        view_all_students.resizable(False, False)
+
+        # create view all students frame
+        view_all_students_frame = tk.Frame(view_all_students, bg="white")
+        view_all_students_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        # get student details from database and display to treeview
+        conn = sl.connect('college.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM students")
+        students = c.fetchall()
+
+        # create treeview and add columns to it displaying student details
+        tree = ttk.Treeview(view_all_students_frame, columns=("Student ID", "First Name", "Last Name", "Course", "Address", "Email", "Password"))
+        tree.heading("#0", text="Student ID")
+        tree.heading("#1", text="First Name")
+        tree.heading("#2", text="Last Name")
+        tree.heading("#3", text="Course")
+        tree.heading("#4", text="Address")
+        tree.heading("#5", text="Email")
+        tree.heading("#6", text="Password")
+        for student in students:
+            tree.insert("", "end", text=student[0], values=(student[1], student[2], student[3], student[4], student[5], student[6]))
+        tree.pack()
+
+        # create back button
+        back_button = tk.Button(view_all_students_frame, text="Back", command=view_all_students.destroy)
+        back_button.pack()
+
+    def editStudents():
+        # create edit students window
+        edit_students = tk.Toplevel(win)
+        edit_students.title("Edit Students")
+        edit_students.geometry("1250x720")
+        edit_students.state("zoomed")
+        edit_students.resizable(False, False)
+
+        # create edit students frame
+        edit_students_frame = tk.Frame(edit_students, bg="white")
+        edit_students_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        # get student details from database and display to treeview and edit them
+        conn = sl.connect('college.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM students")
+        students = c.fetchall()
+
+        # create editable treeview and add columns to it displaying student details
+        tree = ttk.Treeview(edit_students_frame, columns=("Student ID", "First Name", "Last Name", "Course", "Address", "Email", "Password"))
+        tree.heading("#0", text="Student ID")
+        tree.heading("#1", text="First Name")
+        tree.heading("#2", text="Last Name")
+        tree.heading("#3", text="Course")
+        tree.heading("#4", text="Address")
+        tree.heading("#5", text="Email")
+        tree.heading("#6", text="Password")
+        for student in students:
+            tree.insert("", "end", text=student[0], values=(student[1], student[2], student[3], student[4], student[5], student[6]))
+        tree.pack()
+
+        # highlight selected row and display student details in entry boxes to edit
+        def selectItem(a):
+            curItem = tree.focus()
+            print(tree.item(curItem))
+            ent1.delete(0, "end")
+            ent1.insert(0, tree.item(curItem)["values"][0])
+            ent2.delete(0, "end")
+            ent2.insert(0, tree.item(curItem)["values"][1])
+            ent3.delete(0, "end")
+            ent3.insert(0, tree.item(curItem)["values"][2])
+            ent4.delete(0, "end")
+            ent4.insert(0, tree.item(curItem)["values"][3])
+            ent5.delete(0, "end")
+            ent5.insert(0, tree.item(curItem)["values"][4])
+            ent6.delete(0, "end")
+            ent6.insert(0, tree.item(curItem)["values"][5])
+            ent7.delete(0, "end")
+            ent7.insert(0, tree.item(curItem)["values"][6])
+        tree.bind('<<TreeviewSelect>>', selectItem)
+
+        # create entry boxes to edit student details
+        ent1 = tk.Entry(edit_students_frame, width=30)
+        ent1.pack()
+        ent2 = tk.Entry(edit_students_frame, width=30)
+        ent2.pack()
+        ent3 = tk.Entry(edit_students_frame, width=30)
+        ent3.pack()
+        ent4 = tk.Entry(edit_students_frame, width=30)
+        ent4.pack()
+        ent5 = tk.Entry(edit_students_frame, width=30)
+        ent5.pack()
+        ent6 = tk.Entry(edit_students_frame, width=30)
+        ent6.pack()
+        ent7 = tk.Entry(edit_students_frame, width=30)
+        ent7.pack()
+
+        # create save button to save edited student details
+        def save():
+            conn = sl.connect('college.db')
+            c = conn.cursor()
+            c.execute("UPDATE students SET first_name = ?, last_name = ?, course = ?, address = ?, email = ?, password = ? WHERE student_id = ?", (ent2.get(), ent3.get(), ent4.get(), ent5.get(), ent6.get(), ent7.get(), ent1.get()))
+            conn.commit()
+            conn.close()
+            mb.showinfo("Success", "Student details updated successfully!")
+        save_button = tk.Button(edit_students_frame, text="Save", command=save)
+        save_button.pack()
+
+        # create back button
+        back_button = tk.Button(edit_students_frame, text="Back", command=edit_students.destroy)
+        back_button.pack()
+
+    def deleteStudents():
+        # create delete students window
+        delete_students = tk.Toplevel(win)
+        delete_students.title("Delete Students")
+        delete_students.geometry("1250x720")
+        delete_students.state("zoomed")
+        delete_students.resizable(False, False)
+
+        # create delete students frame
+        delete_students_frame = tk.Frame(delete_students, bg="white")
+        delete_students_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+        # get student details from database and display to treeview and delete them
+        conn = sl.connect('college.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM students")
+        students = c.fetchall()
+
+        # create treeview and add columns to it displaying student details
+        tree = ttk.Treeview(delete_students_frame, columns=("Student ID", "First Name", "Last Name", "Course", "Address", "Email", "Password"))
+        tree.heading("#0", text="Student ID")
+        tree.heading("#1", text="First Name")
+        tree.heading("#2", text="Last Name")
+        tree.heading("#3", text="Course")
+        tree.heading("#4", text="Address")
+        tree.heading("#5", text="Email")
+        tree.heading("#6", text="Password")
+        for student in students:
+            tree.insert("", "end", text=student[0], values=(student[1], student[2], student[3], student[4], student[5], student[6]))
+        tree.pack()
+
+        # highlight selected row and delete student details from database
+        def selectItem(a):
+            curItem = tree.focus()
+            print(tree.item(curItem))
+            conn = sl.connect('college.db')
+            c = conn.cursor()
+            c.execute("DELETE FROM students WHERE student_id = ?", (tree.item(curItem)["text"],))
+            conn.commit()
+            conn.close()
+            mb.showinfo("Success", "Student deleted successfully!")
+        tree.bind('<<TreeviewSelect>>', selectItem)
+
+        # create back button
+        back_button = tk.Button(delete_students_frame, text="Back", command=delete_students.destroy)
+        back_button.pack()
+
 
     # create main window student portal
     win = tk.Tk()
@@ -120,18 +285,15 @@ def main():
     student_menu = tk.Menu(menubar, tearoff=0)
     student_menu.add_command(label="View Profile", command=viewProfile)
     student_menu.add_command(label="Edit Profile", command=editProfile)
-    student_menu.add_command(label="Change Password")
-    student_menu.add_command(label="Logout")
-    student_menu.add_command(label="Exit")
+    student_menu.add_command(label="Logout", command=win.destroy)
     menubar.add_cascade(label="Student", menu=student_menu)
 
     # create course menu
     course_menu = tk.Menu(menubar, tearoff=0)
-    course_menu.add_command(label="View Courses")
-    course_menu.add_command(label="Register Courses")
-    course_menu.add_command(label="Drop Courses")
-    course_menu.add_command(label="View Grades")
-    menubar.add_cascade(label="Course", menu=course_menu)
+    course_menu.add_command(label="View All Students", command=viewAllStudents)
+    course_menu.add_command(label="Edit Students", command=editStudents)
+    course_menu.add_command(label="Delete Students", command=deleteStudents)
+    menubar.add_cascade(label="Other Students", menu=course_menu)
 
     # create label welcome message and display student name
     conn = sl.connect('college.db')
@@ -139,8 +301,8 @@ def main():
     c.execute("SELECT * FROM students WHERE student_id = ?", (entry_1.get(),))
     student = c.fetchone()
     welcome_label = tk.Label(win, text="Welcome " + student[1] + " " + student[2])
+    welcome_label.configure(font=("Arial", 20))
     welcome_label.pack()
-
     win.mainloop()
 
 
